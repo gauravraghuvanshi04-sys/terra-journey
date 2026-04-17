@@ -1,0 +1,366 @@
+
+<h2 class="sr-only">Terra client onboarding interview tool — multi-journey intake for CSMs</h2>
+<style>
+.nstatus{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nrow{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11.5px;color:var(--color-text-primary)}
+.nrow:hover,.nrow.sel{background:var(--color-background-secondary)}
+.qlabel{font-size:11.5px;color:var(--color-text-secondary);margin:0 0 4px}
+.qfield{width:100%;box-sizing:border-box;min-height:52px;font-size:12px;padding:6px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:6px;background:transparent;color:var(--color-text-primary);resize:vertical;font-family:var(--font-sans)}
+.qfield:focus{outline:none;border-color:var(--color-border-primary)}
+.chip{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;display:inline-block}
+.sc{border:0.5px solid var(--color-border-tertiary);border-radius:9px;padding:9px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:background 0.1s}
+.sc.on{border-color:#1D9E75;background:#E1F5EE}
+.sc.on .sc-n{color:#085041}
+.sc.on .sc-d{color:#0F6E56}
+.nb{font-size:12px;padding:5px 13px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:transparent;cursor:pointer;color:var(--color-text-primary)}
+.nb:hover{background:var(--color-background-secondary)}
+.nb.pri{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.sst{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--color-text-primary)}
+.sst:hover{background:var(--color-background-secondary)}
+.jlabel{font-size:10px;font-weight:500;letter-spacing:0.05em;color:var(--color-text-secondary);padding:8px 8px 3px;text-transform:uppercase}
+.statsel{font-size:12px;padding:4px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:6px;background:transparent;color:var(--color-text-primary);cursor:pointer}
+</style>
+
+<div id="ph1" style="padding:2rem;max-width:640px;margin:0 auto">
+  <p style="font-size:10px;color:var(--color-text-secondary);margin:0 0 3px;letter-spacing:.05em">TERRA · PERCH</p>
+  <p style="font-size:20px;font-weight:500;margin:0 0 6px">New client onboarding</p>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 24px">Complete this setup before the intake call. Each selection scopes which journey nodes your CSM will interview the client through.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+    <div><p class="qlabel">Client name</p><input id="cname" type="text" placeholder="e.g. Acme Corp" style="width:100%;box-sizing:border-box;font-size:13px;padding:7px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:6px;background:transparent;color:var(--color-text-primary)"></div>
+    <div><p class="qlabel">CRM system</p><select id="ccrm" style="width:100%;font-size:13px;padding:6px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:6px;background:transparent;color:var(--color-text-primary)"><option>Salesforce</option><option>HubSpot</option><option>Custom CRM</option><option>Other</option></select></div>
+    <div><p class="qlabel">Dialer system</p><select id="cdial" style="width:100%;font-size:13px;padding:6px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:6px;background:transparent;color:var(--color-text-primary)"><option>VICIDIAL</option><option>Five9</option><option>Salesloft</option><option>None / Manual</option><option>Other</option></select></div>
+  </div>
+  <p class="qlabel" style="margin-bottom:10px;font-size:12px">Which journeys apply to this client? <span style="color:var(--color-text-tertiary)">(enable all that apply — disabling a journey skips those nodes in the intake)</span></p>
+  <div id="scope-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px"></div>
+  <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:16px;margin-top:4px;display:flex;align-items:center;gap:10px">
+    <button class="nb pri" onclick="startPhase2()">Begin intake interview →</button>
+    <span style="font-size:11.5px;color:var(--color-text-secondary)">Required nodes will be surfaced first. Important nodes follow after.</span>
+  </div>
+</div>
+
+<div id="ph2" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;font-weight:500" id="tb-client">Client</span>
+      <span class="chip" style="background:#E1F5EE;color:#085041" id="tb-sys"></span>
+      <span class="chip" style="background:var(--color-background-secondary);color:var(--color-text-secondary)" id="tb-phase">Phase 2 — Required nodes</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:11.5px;color:var(--color-text-secondary)" id="prog-txt">0 / 0 complete</span>
+      <div style="width:80px;height:3px;background:var(--color-border-tertiary);border-radius:2px"><div id="prog-bar" style="height:3px;background:#1D9E75;border-radius:2px;width:0%;transition:width .3s"></div></div>
+      <button class="nb" onclick="showPh3()">View summary →</button>
+    </div>
+  </div>
+  <div style="display:flex;height:590px">
+    <div id="sidebar" style="width:205px;min-width:205px;overflow-y:auto;border-right:0.5px solid var(--color-border-tertiary);padding:8px 6px"></div>
+    <div id="mainarea" style="flex:1;overflow-y:auto;padding:1.25rem 1.5rem"></div>
+  </div>
+</div>
+
+<div id="ph3" style="display:none;padding:1.5rem">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <button class="nb" onclick="backToInterview()">← Back to interview</button>
+    <p style="font-size:16px;font-weight:500;margin:0">Onboarding readiness summary</p>
+  </div>
+  <div id="summary-grid"></div>
+</div>
+
+<script>
+const JOURNEYS=[
+  {id:'Lead',label:'Lead-to-Opp',desc:'Lead creation through qualification & opp/appt creation',def:true,color:'#1D9E75',bg:'#E1F5EE',tc:'#085041'},
+  {id:'Opportunity',label:'Opportunity',desc:'Pipeline entry through close-won & post-sale validation',def:true,color:'#378ADD',bg:'#E6F1FB',tc:'#0C447C'},
+  {id:'Appointment',label:'Appointment',desc:'Meeting/visit creation through commercial outcome',def:false,color:'#7F77DD',bg:'#EEEDFE',tc:'#3C3489'},
+  {id:'Sales',label:'Sales',desc:'Sale confirmation, install & fulfillment',def:true,color:'#639922',bg:'#EAF3DE',tc:'#27500A'},
+  {id:'Retention',label:'Retention',desc:'At-risk signals, save campaigns & revenue realization',def:true,color:'#D85A30',bg:'#FAECE7',tc:'#712B13'},
+  {id:'Dialer',label:'Dialer',desc:'Record loading, attempt cycles & campaign movements',def:true,color:'#BA7517',bg:'#FAEEDA',tc:'#633806'},
+  {id:'WFM',label:'WFM Layer',desc:'Agent schedules, activity logs & adherence tracking',def:false,color:'#888780',bg:'#F1EFE8',tc:'#444441'}
+];
+
+const NODES=[
+  {id:'L1.ENTRY',name:'Lead Created / Loaded',j:'Lead',p:'Required',desc:'Cohort anchor for all downstream analysis. Every velocity metric — speed-to-lead, time-to-contact, lead-to-opp days — is measured from this timestamp.',kpis:'Leads Created, Lead-to-Dialer Lag, Duplicate Rate',ts:'lead_created_date · dialer_load_date',qs:['Is the lead creation timestamp consistent across all sources (CRM, dialer, marketing platform)?','Are there leads in the dialer that have no corresponding CRM record — and vice versa?','Are duplicate leads detected and deduped before or after creation? What is the dedup logic?']},
+  {id:'L1.MID.QUALIFIED',name:'Sales Qualification Checkpoint',j:'Lead',p:'Required',desc:'The point where the business determines which leads enter active sales scope. Separates active pursuit from exclusions and hold states.',kpis:'Qualification Rate, Exclusion Rate by Reason',ts:'qualification_date · dialer_sync_date',qs:['Is qualification explicit — a status field set to "qualified" — or implicit (e.g., being loaded into the dialer means qualified)?','What are the primary reasons a lead is NOT qualified at this stage?']},
+  {id:'L1.EXIT.EXCLUDED',name:'Lead Excluded / Out of Scope',j:'Lead',p:'Required',desc:'Lead does not enter the sales lifecycle — duplicate, invalid data, non-serviceable, or compliance failure.',kpis:'Exclusion Rate, Exclusion by Reason, Invalid Contact Rate',ts:'exclusion_date',qs:['Are excluded leads removed from reporting denominators consistently?','Are control/test hold-out leads correctly separated from true exclusions in the data?']},
+  {id:'L1.EXIT.HOLD',name:'Lead in Nurture / Hold',j:'Lead',p:'Important',desc:'Lead exists but is not ready for active sales work. Awaiting enrichment, timing, or nurture sequence. Expected to eventually become sales-eligible.',kpis:'Hold Duration, Hold-to-Active Conversion Rate',ts:'hold_entry_date · scheduled_callback_date',qs:['Are hold leads included in lead-created counts but excluded from in-scope conversion denominators?','What triggers a lead to move from hold back to active — a date, a score, a manual action?']},
+  {id:'L2.ENTRY',name:'Working Path Selection',j:'Lead',p:'Required',desc:'Sales-qualified lead routed to dialer, assigned rep, or delayed queue. This branching point determines the entire downstream execution model.',kpis:'Working Path Distribution %, Routing Lag, Zero-Attempt Rate',ts:'routing_decision_date',qs:['Is the routing decision recorded explicitly or inferred from which system the lead appears in?','What paths exist — dialer only, or also named rep / manual workflows?']},
+  {id:'L2.EXIT.DIALER',name:'Routed to Dialer Path',j:'Lead',p:'Required',desc:'Lead marked dialer-eligible and queued for outbound working through a structured contact strategy.',kpis:'Leads Loaded to Dialer, Zero-Attempt Rate',ts:'dialer_load_date · hopper_entry_date',qs:['Are there leads marked dialer-eligible that never appear in the actual dialer system?','How are zero-attempt leads (loaded but never called) tracked and surfaced today?']},
+  {id:'L2.EXIT.ASSIGNED',name:'Routed to Assigned Rep',j:'Lead',p:'Important',desc:'Lead assigned to direct rep or manual workflow. For named-rep, high-value, or compliance-restricted leads.',kpis:'Assignment-to-First-Contact Lag, Assigned vs Dialer Conversion Rate',ts:'assignment_date',qs:['Are assigned-path leads tracked with the same rigor as dialer leads?','Is there attempt and contact tracking for manual rep workflows?']},
+  {id:'L3.ENTRY',name:'Active Working Record Created',j:'Lead',p:'Required',desc:'An operational work item exists for this lead. The contact strategy clock starts here.',kpis:'Working Records per Lead, Record Creation Lag',ts:'dialer_load_date',qs:['Is there a measurable gap between record creation and the first actual working attempt?','Are there working records with no subsequent attempts — and how many exist today?']},
+  {id:'L3.MID.FIRST_ATTEMPT',name:'First Outreach Attempt',j:'Lead',p:'Required',desc:'Speed-to-lead measurement point. Time from entry to first attempt is one of the strongest predictors of contact rate.',kpis:'Speed-to-Lead (min), SLA Compliance Rate, First-Attempt Connect Rate',ts:'first_attempt_date',qs:['Are there leads with a working record but no first attempt ever logged?','Is the speed-to-lead SLA measured in business hours or calendar hours?','What is the current SLA target (e.g., 5 minutes, 30 minutes, 1 hour)?']},
+  {id:'L3.MID.CONTACT',name:'Meaningful Contact Made',j:'Lead',p:'Required',desc:'A meaningful conversation with the right party. Distinct from a connection. This is the pivotal moment where the business gets its chance to qualify.',kpis:'Contact Rate, Contact-to-Opp Rate, First Contact Attempt #',ts:'first_contact_date',qs:['How is "contact" defined — a duration threshold, a specific disposition code, agent judgment?','Is the contact definition consistent between dialer dispositions and actual conversation quality?']},
+  {id:'L3.EXIT.EXHAUSTED',name:'Attempts Exhausted',j:'Lead',p:'Required',desc:'Lead reached the maximum attempt cap without a target outcome. Whether truly unreachable or under-worked is a key analytical question.',kpis:'Exhaustion Rate, Lead Score of Exhausted Leads, Recycle Rate',ts:'last_attempt_date · exhaustion_date',qs:['What is the maximum attempt cap and is it consistently enforced across all campaigns?','What is the recycle cooldown period — and is it enforced?','Are recycled leads distinguishable from fresh leads in analytics (new dialer record vs same)?']},
+  {id:'L3.EXIT.NOT_INTERESTED',name:'Not Interested',j:'Lead',p:'Important',desc:'Contact made but customer declined. May be terminal (DNC) or soft exit allowing future re-engagement.',kpis:'Not-Interested Rate, Re-engagement Rate',ts:'not_interested_date',qs:['Are DNC leads permanently excluded from all future campaigns?','Are soft refusals distinguished from hard DNC in disposition codes or data fields?']},
+  {id:'L4.ENTRY',name:'Qualification Conversation',j:'Lead',p:'Required',desc:'Following meaningful contact, a qualification conversation determines whether a commercial object should be created. Highest-leverage moment in the lead journey.',kpis:'Qualification-to-Opp Rate, Same-Call vs Multi-Call Creation Rate',ts:'qualification_call_date',qs:['Can you distinguish same-call opp creation from multi-call (opp created on a follow-up call)?','What must be true before an opp is created — is there a defined qualification threshold?']},
+  {id:'L4.EXIT.OPP_CREATED',name:'Opportunity Created',j:'Lead',p:'Required',desc:'Terminal success node of L4 and entry point of the Opportunity Journey. Most important conversion event in the lead funnel.',kpis:'Lead-to-Opp Conversion Rate, Lead-to-Opp Days',ts:'opportunity_created_date',qs:['Is the opp creation timestamp the actual moment of creation or a batch-processed date?','Is the lead-to-opp link maintained in the data — can you trace from opp back to originating lead?']},
+  {id:'L4.EXIT.APPT_CREATED',name:'Appointment Created',j:'Lead',p:'Important',desc:'A scheduled event has been created from contact. For appointment-led businesses this is equivalent to L4.EXIT.OPP_CREATED.',kpis:'Lead-to-Appointment Conversion Rate, Lead-to-Appointment Days',ts:'appointment_created_date',qs:['Is the appointment linked back to the originating lead record?','Can you trace the full path: lead source → appointment → sit outcome?']},
+  {id:'O1.ENTRY',name:'Opp Enters Pipeline',j:'Opportunity',p:'Required',desc:'Opportunity created and enters active pipeline. Cohort anchor for opp analysis. Follow-up speed is the strongest early predictor of close rate.',kpis:'Opps Created, Pipeline Value, Immediate Loss Rate',ts:'opportunity_created_date · first_followup_scheduled_date',qs:['Is opp creation timestamp consistent across all creation paths (dialer, manual, web)?','Are zero-activity opps — created but never followed up — identifiable in your data today?']},
+  {id:'O2.ENTRY',name:'Active Working — Follow-Up',j:'Opportunity',p:'Required',desc:'Rep making follow-up contacts and advancing CRM stages toward a formal proposal. Follow-up discipline is the strongest lever here.',kpis:'Days to First Follow-Up, Follow-Up Contact Rate, Days Since Last Attempt',ts:'first_call_date · next_scheduled_followup',qs:['Are manual CRM activities reconciled with dialer call records?','Are there opps with zero post-creation activity — and how are these surfaced today?']},
+  {id:'O3.ENTRY',name:'Proposal Delivered',j:'Opportunity',p:'Required',desc:'Formal proposal in prospect\'s hands. Evaluation and closing window begins. Terminal outcomes are Won or Lost.',kpis:'Proposal-to-Close Days, Proposal-to-Win Rate',ts:'proposal_delivered_date · close_date',qs:['Is proposal delivery a distinct tracked event or inferred from a CRM stage change?','What CRM stage or field represents "proposal delivered" in your system?']},
+  {id:'O4.ENTRY',name:'Closed Won — Post-Sale Validation',j:'Opportunity',p:'Required',desc:'Post-sale validation window. Cancellations or verification failures can reverse the sale. Often overlooked in onboarding.',kpis:'Post-Sale Reversal Rate, Days Sale to Confirmation, True-Up Window Length',ts:'sale_date · confirmation_date · reversal_date',qs:['Is post-sale validation a distinct tracked event or assumed (sale = automatically confirmed)?','How long is the true-up / validation window?','If validation fails — is it recorded as a reversal, or treated as if the sale never happened?']},
+  {id:'O5.ENTRY',name:'Aged / Stalled Opp Recovery',j:'Opportunity',p:'Required',desc:'Opportunities that stopped progressing — open but dormant. A structured re-engagement motion, not a terminal state.',kpis:'Aged Opp Inventory, Recovery Close Rate, % Pipeline 30/60/90+ Days',ts:'last_activity_date · re_engagement_date',qs:['Is stall detection system-level (an automated flag) or purely analytical (run in reporting)?','Are stalled opps automatically loaded into recovery campaigns or handled manually?','What is the stall threshold — how many days of no activity before an opp is flagged?']},
+  {id:'A1.ENTRY',name:'Appointment / Meeting Created',j:'Appointment',p:'Required',desc:'Scheduled event created with a future date. For B2B: primary SDR milestone. For field-visit: determines confirmation window.',kpis:'Appointments Created, Scheduling Lag (days), Same-Day Rate',ts:'appointment_created_date · scheduled_event_date',qs:['Is the appointment linked to the originating lead record in the data?','Can rescheduled appointments be traced back to the original booking?','Is there a distinct flag or field differentiating new bookings from reschedules?']},
+  {id:'A2.ENTRY',name:'Pre-Event Confirmation',j:'Appointment',p:'Required',desc:'Confirmation cycle protects appointments from no-show and cancellation. Unconfirmed appointments are materially more fragile.',kpis:'Confirmation Rate, Confirmed vs Unconfirmed Sit Rate',ts:'confirmation_attempt_date · confirmation_status_date',qs:['Is the confirmation process tracked at interaction level (each call logged) or only at status level (confirmed yes/no)?','How many confirmation attempts are made per appointment on average?']},
+  {id:'A3.ENTRY',name:'Sit / Meeting Held',j:'Appointment',p:'Required',desc:'Event date arrives. The highest-value node — determines whether the downstream commercial conversation happens.',kpis:'Sit Rate / Show Rate, NAH / No-Show Rate, Confirmed vs Unconfirmed Sit Rate',ts:'visit_date · quote_generated_date',qs:['Is the sit/visit outcome recorded in real-time in the field or batch-entered afterward?','Is NAH (no adult home) clearly distinguished from a cancelled appointment in your data?']},
+  {id:'A4.ENTRY',name:'Post-Event Outcome',j:'Appointment',p:'Required',desc:'Commercial outcome determined. Entity transitions to Opportunity or Sales Journey.',kpis:'Opp Creation Rate from Sits, Sale-at-Visit Rate, No-Outcome Rate',ts:'visit_completion_date · opportunity_created_date',qs:['Is the commercial outcome linked back to the specific appointment and original booking source?','For visits that don\'t close, how is the follow-up tracked — new opp created?']},
+  {id:'A5.ENTRY',name:'Cancellation & NAH Recovery',j:'Appointment',p:'Important',desc:'Recovery lane for cancelled or NAH appointments. For field-visit models, a first-class operating motion with dedicated campaigns.',kpis:'Recovery Rebook Rate, Recovery Sit Rate vs Original',ts:'cancellation_or_nah_date · recovery_rebook_date',qs:['How quickly are cancelled/NAH records loaded into recovery campaigns?','Is the attempt cap for recovery distinct from the original outreach attempt cap?']},
+  {id:'S1.ENTRY',name:'Sale Closed / Order Submitted',j:'Sales',p:'Required',desc:'Primary conversion event — sale closed, order submitted, contract signed. Most important downstream outcome of the funnel.',kpis:'Sales Count, Revenue per Sale, Sales Velocity (opp-to-sale days)',ts:'sale_date · registration_date',qs:['Is sale_date the actual moment of sale or the date it was recorded in the system?','Are there sales without a prior opportunity — walk-ins, direct closings, inbound converts?']},
+  {id:'S1.EXIT.CONFIRMED',name:'Sale Confirmed / Validated',j:'Sales',p:'Required',desc:'Sale passes validation. Payment confirmed, verification complete. This is when the sale is considered real and clean.',kpis:'Confirmation Rate, Sale-to-Confirmation Lag, Immediate Failure Rate',ts:'confirmation_date · retention_window_start',qs:['Is validation a distinct tracked event or assumed (sale = confirmed automatically)?','If validation fails — is it recorded as a reversal, or was the sale never counted?']},
+  {id:'S2.ENTRY',name:'Install / Fulfillment Scheduling',j:'Sales',p:'Important',desc:'For businesses where a physical install or activation follows the sale. Covers payment confirmation through service delivery.',kpis:'Install Completion Rate, Sale-to-Install Days, Install Cancellation Rate',ts:'install_scheduled_date · install_completed_date',qs:['Does this install/fulfillment step apply to this client\'s model?','Is install tracking in the same system as sales tracking — or a separate platform?','Are install cancellation reasons captured in a structured field?']},
+  {id:'R1.ENTRY',name:'At-Risk Signal Detected',j:'Retention',p:'Required',desc:'A sold customer enters a risk state — cancellation request, install cancel, payment failure, or churn signal. Triggers the save motion.',kpis:'Cancellation Rate, Cancel Reasons Distribution, At-Risk-to-Save Lag',ts:'cancel_request_date · save_campaign_load_date',qs:['Are all cancellations captured or do some fall through without triggering a save attempt?','What are the primary cancellation reasons — are they structured data or free text notes?']},
+  {id:'R2.ENTRY',name:'Retention Campaign Execution',j:'Retention',p:'Required',desc:'At-risk customer loaded into save campaign or assigned to retention specialist. Has its own attempt caps and success criteria.',kpis:'Save Attempt Rate, Save Contact Rate, Save Success Rate, Talk Time on Retention Calls',ts:'campaign_load_date · first_save_attempt_date',qs:['Are retention campaign interactions tracked with the same granularity as lead-stage interactions?','Is the save campaign in the dialer or managed manually by retention specialists?']},
+  {id:'R3.ENTRY',name:'Revenue Realization Window',j:'Retention',p:'Required',desc:'Sale in its retention monitoring period. Revenue is provisional until this window passes.',kpis:'Retention Rate, Window Cancellation Rate, Revenue Realized vs At-Risk',ts:'retention_window_start · retention_window_end',qs:['Is the retention window consistently applied across all sale types and products?','Are cancellations during the window distinguished from post-window churn in your data?','How long is the standard retention window for this client?']},
+  {id:'D1.ENTRY',name:'Record Loaded into Dialer',j:'Dialer',p:'Required',desc:'Operational record loaded into dialer. The same entity creates multiple records across different campaigns — lead, rehash, RP, save.',kpis:'Records Loaded, Zero-Attempt Rate, Load-to-First-Attempt Lag',ts:'dialer_load_date · hopper_entry_date',qs:['Are dialer load timestamps reliable and consistently populated across all campaigns?','Can you reconcile CRM lead counts with dialer record counts today?','What campaigns produce dialer records — lead, rehash, reschedule, save, RP?']},
+  {id:'D2.MID.ATTEMPT_CYCLE',name:'Attempt Execution Cycle',j:'Dialer',p:'Required',desc:'Core execution loop: attempt → disposition → recycle decision → next attempt. Per-attempt tracking enables cadence analysis.',kpis:'Connect Rate by Attempt #, Contact Rate by Attempt #, Inter-Attempt Interval',ts:'attempt_N_date · last_attempt_date',qs:['Are inter-attempt intervals matching the configured cadence rules in the dialer?','Are all dialer systems producing consistent per-attempt records — or are some gaps?','Are disposition codes standardized or do they vary by campaign?']},
+  {id:'D3.ENTRY',name:'Campaign / List Movement',j:'Dialer',p:'Required',desc:'Record transitions from one dialer campaign to another. This is the mechanism for all cross-journey re-loops.',kpis:'Transitions by Source-Destination, Transition Lag, Cross-Campaign Conversion Rate',ts:'source_campaign_exit_date · destination_campaign_entry_date',qs:['Is the campaign transition logged as a distinct event or inferred from the record appearing in a new campaign?','What are the most common campaign transitions (e.g., lead → rehash, confirmation → reschedule)?']},
+  {id:'W1.SCHEDULE',name:'Agent Schedule / Planned Capacity',j:'WFM',p:'Required',desc:'Planned agent hours by shift, team, and role. The denominator for all adherence calculations. Without this, you can\'t measure efficiency.',kpis:'Scheduled Hours per Agent per Day, Total Planned Capacity',ts:'scheduled_login_time · scheduled_logout_time',qs:['Is schedule data available in a structured format (file export, API, system)?','Is it at the agent-day or agent-shift level?','Are historical schedules retained, or only current and future schedules available?']},
+  {id:'W2.ACTIVITY',name:'Agent Activity Log / Actual Time',j:'WFM',p:'Required',desc:'Time-stamped record of every agent state from login to logout — talk, wait, ACW, break, coaching. Reveals how hours are distributed.',kpis:'Schedule Adherence Rate, Utilization Rate, Talk Time per Login Hour, ACW Rate',ts:'login_time · logout_time · session_start · session_end',qs:['Are all agent status codes consistently applied by agents, or is there widespread miscoding?','Is there a meaningful unknown/blank status code that signals uncaptured time?','Are ACW (after-call work) durations captured per interaction?']}
+];
+
+const STATUS_OPTS=[
+  {v:'ns',label:'Not started',dot:'var(--color-border-secondary)'},
+  {v:'ip',label:'In progress',dot:'#BA7517'},
+  {v:'done',label:'Complete',dot:'#1D9E75'},
+  {v:'blocked',label:'Blocked',dot:'#D85A30'},
+  {v:'na',label:'N/A',dot:'#B4B2A9'}
+];
+
+let selJ=new Set(JOURNEYS.filter(j=>j.def).map(j=>j.id));
+let nodeState={};
+let curNode=null;
+let clientInfo={name:'',crm:'',dialer:''};
+
+NODES.forEach(n=>{
+  nodeState[n.id]={status:'ns',answers:n.qs.map(()=>''),notes:''};
+});
+
+function dotColor(s){return STATUS_OPTS.find(o=>o.v===s)?.dot||'var(--color-border-secondary)'}
+function jConf(jid){return JOURNEYS.find(j=>j.id===jid)}
+
+function buildPh1(){
+  const g=document.getElementById('scope-grid');
+  g.innerHTML='';
+  JOURNEYS.forEach(jc=>{
+    const on=selJ.has(jc.id);
+    const d=document.createElement('div');
+    d.className='sc'+(on?' on':'');
+    d.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${jc.color};flex-shrink:0"></div><div><p class="sc-n" style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary)">${jc.label}</p><p class="sc-d" style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">${jc.desc}</p></div>`;
+    d.onclick=()=>{
+      if(selJ.has(jc.id))selJ.delete(jc.id); else selJ.add(jc.id);
+      buildPh1();
+    };
+    g.appendChild(d);
+  });
+}
+
+function startPhase2(){
+  clientInfo.name=document.getElementById('cname').value||'New Client';
+  clientInfo.crm=document.getElementById('ccrm').value;
+  clientInfo.dialer=document.getElementById('cdial').value;
+  document.getElementById('tb-client').textContent=clientInfo.name;
+  document.getElementById('tb-sys').textContent=clientInfo.crm+' · '+clientInfo.dialer;
+  document.getElementById('ph1').style.display='none';
+  document.getElementById('ph2').style.display='block';
+  const activeNodes=NODES.filter(n=>selJ.has(n.j));
+  if(activeNodes.length>0)curNode=activeNodes[0].id;
+  renderSidebar();
+  renderMain();
+  updateProgress();
+}
+
+function renderSidebar(){
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML='';
+  JOURNEYS.filter(j=>selJ.has(j.id)).forEach(jc=>{
+    const jnodes=NODES.filter(n=>n.j===jc.id);
+    const done=jnodes.filter(n=>nodeState[n.id].status==='done'||nodeState[n.id].status==='na').length;
+    const lbl=document.createElement('div');
+    lbl.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 8px 3px';
+    lbl.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${jc.color}"></div><span style="font-size:10px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.04em;text-transform:uppercase">${jc.label}</span><span style="font-size:10px;color:var(--color-text-tertiary);margin-left:auto">${done}/${jnodes.length}</span>`;
+    sb.appendChild(lbl);
+    const reqNodes=jnodes.filter(n=>n.p==='Required');
+    const impNodes=jnodes.filter(n=>n.p==='Important');
+    if(reqNodes.length){
+      const rl=document.createElement('p');
+      rl.className='jlabel';
+      rl.style.paddingLeft='22px';
+      rl.textContent='required';
+      sb.appendChild(rl);
+      reqNodes.forEach(n=>sb.appendChild(makeNodeRow(n,jc)));
+    }
+    if(impNodes.length){
+      const il=document.createElement('p');
+      il.className='jlabel';
+      il.style.paddingLeft='22px';
+      il.textContent='important';
+      sb.appendChild(il);
+      impNodes.forEach(n=>sb.appendChild(makeNodeRow(n,jc)));
+    }
+    const sep=document.createElement('div');
+    sep.style.cssText='height:8px';
+    sb.appendChild(sep);
+  });
+}
+
+function makeNodeRow(node,jc){
+  const row=document.createElement('div');
+  const isCur=curNode===node.id;
+  row.className='nrow'+(isCur?' sel':'');
+  row.style.paddingLeft='22px';
+  row.innerHTML=`<div class="nstatus" style="background:${dotColor(nodeState[node.id].status)}"></div><span style="flex:1;line-height:1.3">${node.name}</span>`;
+  row.onclick=()=>{curNode=node.id;renderSidebar();renderMain()};
+  return row;
+}
+
+function renderMain(){
+  const ma=document.getElementById('mainarea');
+  if(!curNode){ma.innerHTML='<p style="color:var(--color-text-secondary);font-size:13px">Select a node from the sidebar to begin.</p>';return;}
+  const node=NODES.find(n=>n.id===curNode);
+  const jc=jConf(node.j);
+  const st=nodeState[node.id];
+  const activeNodes=NODES.filter(n=>selJ.has(n.j));
+  const idx=activeNodes.findIndex(n=>n.id===curNode);
+  const prev=idx>0?activeNodes[idx-1]:null;
+  const next=idx<activeNodes.length-1?activeNodes[idx+1]:null;
+
+  let qHtml='';
+  node.qs.forEach((q,i)=>{
+    qHtml+=`<div style="margin-bottom:14px">
+      <p class="qlabel" style="margin-bottom:5px"><span style="font-size:10px;background:${jc.bg};color:${jc.tc};padding:1px 6px;border-radius:3px;margin-right:6px;font-weight:500">Q${i+1}</span>${q}</p>
+      <textarea class="qfield" onchange="saveAnswer('${node.id}',${i},this.value)" placeholder="Capture client's response…">${st.answers[i]}</textarea>
+    </div>`;
+  });
+
+  const pBadge=node.p==='Required'
+    ?`<span class="chip" style="background:#FAECE7;color:#712B13">${node.p}</span>`
+    :`<span class="chip" style="background:#FAEEDA;color:#633806">${node.p}</span>`;
+
+  ma.innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <span style="font-size:11px;font-weight:500;color:${jc.tc};background:${jc.bg};padding:2px 8px;border-radius:4px">${jc.label}</span>
+          ${pBadge}
+          <span style="font-size:11px;color:var(--color-text-tertiary)">${node.id}</span>
+        </div>
+        <p style="font-size:16px;font-weight:500;margin:0 0 6px">${node.name}</p>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.5;max-width:520px">${node.desc}</p>
+      </div>
+      <div style="flex-shrink:0;margin-left:16px">
+        <p class="qlabel" style="margin-bottom:4px;text-align:right">Node status</p>
+        <select class="statsel" onchange="setStatus('${node.id}',this.value)">
+          ${STATUS_OPTS.map(o=>`<option value="${o.v}"${st.status===o.v?' selected':''}>${o.label}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;padding:9px 12px;background:var(--color-background-secondary);border-radius:7px">
+      <div><p class="qlabel" style="margin-bottom:2px">Key KPIs</p><p style="font-size:11.5px;margin:0;line-height:1.5;color:var(--color-text-primary)">${node.kpis}</p></div>
+      <div><p class="qlabel" style="margin-bottom:2px">Key timestamps</p><p style="font-size:11.5px;margin:0;line-height:1.5;font-family:var(--font-mono);color:var(--color-text-primary)">${node.ts}</p></div>
+    </div>
+    <p style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em">Ask the client</p>
+    ${qHtml}
+    <div style="margin-bottom:14px">
+      <p class="qlabel" style="margin-bottom:4px">Session notes / blockers</p>
+      <textarea class="qfield" style="min-height:44px" onchange="saveNotes('${node.id}',this.value)" placeholder="Any context, follow-ups needed, or data gaps to flag…">${st.notes}</textarea>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary)">
+      <button class="nb" onclick="navNode('${prev?.id||''}')" ${!prev?'disabled style="opacity:.4"':''}>← ${prev?prev.name:'Start'}</button>
+      <div style="display:flex;gap:8px">
+        <button class="nb" onclick="quickMark('${node.id}','done')" style="${st.status==='done'?'border-color:#1D9E75;color:#0F6E56':''}">✓ Mark complete</button>
+        <button class="nb" onclick="quickMark('${node.id}','blocked')" style="${st.status==='blocked'?'border-color:#D85A30;color:#993C1D':''}">⊘ Blocked</button>
+      </div>
+      <button class="nb" onclick="navNode('${next?.id||''}')" ${!next?'disabled style="opacity:.4"':''}>Next: ${next?next.name:'Done'} →</button>
+    </div>
+  `;
+}
+
+function saveAnswer(nid,qi,val){nodeState[nid].answers[qi]=val;autoStatus(nid);}
+function saveNotes(nid,val){nodeState[nid].notes=val;}
+function setStatus(nid,val){nodeState[nid].status=val;renderSidebar();updateProgress();}
+function quickMark(nid,val){nodeState[nid].status=val;renderSidebar();renderMain();updateProgress();}
+function navNode(nid){if(!nid)return;curNode=nid;renderSidebar();renderMain();}
+
+function autoStatus(nid){
+  const n=NODES.find(x=>x.id===nid);
+  const st=nodeState[nid];
+  if(st.status==='ns'&&st.answers.some(a=>a.trim())){st.status='ip';renderSidebar();updateProgress();}
+}
+
+function updateProgress(){
+  const active=NODES.filter(n=>selJ.has(n.j));
+  const done=active.filter(n=>nodeState[n.id].status==='done'||nodeState[n.id].status==='na').length;
+  const pct=active.length?Math.round(done/active.length*100):0;
+  document.getElementById('prog-txt').textContent=done+' / '+active.length+' complete';
+  document.getElementById('prog-bar').style.width=pct+'%';
+}
+
+function showPh3(){
+  document.getElementById('ph2').style.display='none';
+  document.getElementById('ph3').style.display='block';
+  renderSummary();
+}
+
+function backToInterview(){
+  document.getElementById('ph3').style.display='none';
+  document.getElementById('ph2').style.display='block';
+}
+
+function renderSummary(){
+  const sg=document.getElementById('summary-grid');
+  let html='';
+  JOURNEYS.filter(j=>selJ.has(j.id)).forEach(jc=>{
+    const jnodes=NODES.filter(n=>n.j===jc.id);
+    const done=jnodes.filter(n=>{const s=nodeState[n.id].status;return s==='done'||s==='na'}).length;
+    const blocked=jnodes.filter(n=>nodeState[n.id].status==='blocked').length;
+    const req=jnodes.filter(n=>n.p==='Required');
+    const reqDone=req.filter(n=>{const s=nodeState[n.id].status;return s==='done'||s==='na'}).length;
+    const readyColor=reqDone===req.length?'#1D9E75':blocked>0?'#D85A30':'#BA7517';
+    const readyLabel=reqDone===req.length?'Go-live ready':blocked>0?'Blocked':'In progress';
+    html+=`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${jc.color}"></div>
+        <p style="font-size:14px;font-weight:500;margin:0;flex:1">${jc.label}</p>
+        <span class="chip" style="background:${readyColor}22;color:${readyColor}">${readyLabel}</span>
+        <span style="font-size:11.5px;color:var(--color-text-secondary)">${done}/${jnodes.length} nodes complete</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${jnodes.map(n=>{
+          const s=nodeState[n.id];
+          const dot=dotColor(s.status);
+          const hasAns=s.answers.some(a=>a.trim())||s.notes.trim();
+          return `<div style="display:flex;align-items:center;gap:5px;padding:4px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:5px;cursor:pointer;font-size:11px" onclick="jumpTo('${n.id}')">
+            <div class="nstatus" style="background:${dot}"></div>
+            <span style="color:var(--color-text-secondary)">${n.id}</span>
+            <span>${n.name}</span>
+            ${hasAns?'<span style="color:#1D9E75;font-size:9px">✓</span>':''}
+          </div>`;
+        }).join('')}
+      </div>
+      ${blocked>0?`<p style="font-size:11.5px;color:#D85A30;margin:8px 0 0">⊘ ${blocked} node${blocked>1?'s':''} blocked — follow up required before go-live</p>`:''}
+      ${reqDone<req.length&&blocked===0?`<p style="font-size:11.5px;color:#BA7517;margin:8px 0 0">${req.length-reqDone} required node${req.length-reqDone>1?'s':''} still pending</p>`:''}
+    </div>`;
+  });
+  const allActive=NODES.filter(n=>selJ.has(n.j));
+  const reqAll=allActive.filter(n=>n.p==='Required');
+  const reqDoneAll=reqAll.filter(n=>{const s=nodeState[n.id].status;return s==='done'||s==='na'}).length;
+  const blockedAll=allActive.filter(n=>nodeState[n.id].status==='blocked').length;
+  const ipAll=allActive.filter(n=>nodeState[n.id].status==='ip').length;
+  const nsAll=allActive.filter(n=>nodeState[n.id].status==='ns').length;
+  sg.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:12px 14px"><p class="qlabel" style="margin-bottom:4px">Required nodes</p><p style="font-size:20px;font-weight:500;margin:0">${reqDoneAll}/${reqAll.length}</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">complete</p></div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:12px 14px"><p class="qlabel" style="margin-bottom:4px">Blocked</p><p style="font-size:20px;font-weight:500;margin:0;color:${blockedAll>0?'#D85A30':'var(--color-text-primary)'}">${blockedAll}</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">nodes</p></div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:12px 14px"><p class="qlabel" style="margin-bottom:4px">In progress</p><p style="font-size:20px;font-weight:500;margin:0">${ipAll}</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">nodes</p></div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:12px 14px"><p class="qlabel" style="margin-bottom:4px">Not started</p><p style="font-size:20px;font-weight:500;margin:0">${nsAll}</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">nodes</p></div>
+    </div>
+    ${html}
+  `;
+}
+
+function jumpTo(nid){
+  curNode=nid;
+  document.getElementById('ph3').style.display='none';
+  document.getElementById('ph2').style.display='block';
+  renderSidebar();renderMain();
+}
+
+buildPh1();
+</script>
